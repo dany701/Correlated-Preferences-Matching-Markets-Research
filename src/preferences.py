@@ -3,21 +3,21 @@ import numpy as np
 
 def generate_uniform_preferences(n_agents, n_choices, seed=None):
     """
-    Generate independent uniform random preference lists.
+    generate independent uniform random preference lists.
 
-    Parameters
+    parameters
     ----------
     n_agents : int
-        Number of agents for which to generate preferences.
+        number of agents for which to generate preferences.
     n_choices : int
-        Number of distinct options each agent ranks (0 .. n_choices-1).
+        number of distinct options each agent ranks (0 .. n_choices-1).
     seed : int or None, optional
-        Random seed for reproducibility. If None, use global entropy.
+        random seed for reproducibility. If None, use global entropy.
 
-    Returns
+    returns
     -------
     list[list[int]]
-        A list of length n_agents, where each element is a random
+        a list of length n_agents, where each element is a random
         permutation of range(n_choices).
     """
     rng = np.random.default_rng(seed)
@@ -29,7 +29,7 @@ def generate_uniform_preferences(n_agents, n_choices, seed=None):
 
 
 if __name__ == "__main__":
-    # Simple sanity check for reproducibility
+    # simple sanity check for reproducibility
     p1 = generate_uniform_preferences(3, 4, seed=123)
     p2 = generate_uniform_preferences(3, 4, seed=123)
     assert p1 == p2

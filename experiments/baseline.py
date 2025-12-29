@@ -9,7 +9,7 @@ from gale_shapley import gale_shapley, is_stable_matching
 from preferences import generate_uniform_preferences
 
 
-# Constants
+# constants
 N = 100  # number of proposers
 M = 100  # number of receivers
 TRIALS = 300
@@ -24,18 +24,18 @@ def run_baseline():
     perfect_count = 0
     total_matched = 0
 
-    # Run small stability checks for first 3 trials
+    # run small stability checks for first 3 trials
     for t in range(TRIALS):
         trial_seed = SEED + t
 
-        # Generate preferences
+        # generate preferences
         proposers_prefs = generate_uniform_preferences(N, M, seed=trial_seed)
         receivers_prefs = generate_uniform_preferences(M, N, seed=trial_seed + 10_000)
 
-        # Run matching
+        # run matching
         matching = gale_shapley(proposers_prefs, receivers_prefs)
 
-        # Stability check for first 3 trials on small size
+        # stability check for first 3 trials on small size
         if t < 3:
             small_n, small_m = 8, 8
             small_proposers = generate_uniform_preferences(small_n, small_m, seed=trial_seed)
@@ -46,29 +46,29 @@ def run_baseline():
             if t == 0:
                 print("✓ Stability checks passed for first 3 trials (N=8, M=8)")
 
-        # Compute proposer rank statistics
+        # compute proposer rank statistics
         trial_ranks = []
         for p in range(N):
             if p in matching:
                 r = matching[p]
-                # Find 1-indexed rank (add 1 to 0-indexed position)
+                # find 1-indexed rank (add 1 to 0-indexed position)
                 rank = proposers_prefs[p].index(r) + 1
                 trial_ranks.append(rank)
 
         all_proposer_ranks.extend(trial_ranks)
 
-        # Check if perfect matching
+        # check if perfect matching
         if len(matching) == N:
             perfect_count += 1
 
         total_matched += len(matching)
 
-    # Compute statistics
+    # compute statistics
     mean_rank = np.mean(all_proposer_ranks)
     fraction_perfect = perfect_count / TRIALS
     avg_matched = total_matched / TRIALS
 
-    # Print results
+    # print results
     print(f"\n{'='*60}")
     print("BASELINE EXPERIMENT RESULTS")
     print(f"{'='*60}")
@@ -77,7 +77,7 @@ def run_baseline():
     print(f"Average matched proposers: {avg_matched:.1f} / {N}")
     print(f"{'='*60}\n")
 
-    # Generate plot
+    # generate plot
     results_dir = os.path.join(os.path.dirname(__file__), '../results')
     os.makedirs(results_dir, exist_ok=True)
 
