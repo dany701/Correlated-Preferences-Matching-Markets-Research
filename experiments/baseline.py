@@ -18,7 +18,7 @@ SEED = 0
 
 def run_baseline():
     """
-    Run the baseline experiment with uniform random preferences.
+    run the baseline experiment with uniform random preferences.
     """
     all_proposer_ranks = []
     perfect_count = 0
