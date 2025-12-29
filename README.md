@@ -1,5 +1,7 @@
 # Matching Markets: Random Matching Markets Baseline
 
+**CSCI 23 Winter Study Independent Project**
+
 ## Overview
 
 This project extends the work of Potukuchi & Singh (2024) by investigating the behavior of stable matching markets under various preference correlation structures. The baseline implementation uses uniform random preferences to establish benchmark statistics for proposer-optimal outcomes. Future work will explore tiered and Mallows preference models to understand how correlation affects perfect matching rates and rank distributions.
