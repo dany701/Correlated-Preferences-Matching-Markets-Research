@@ -4,7 +4,7 @@
 
 ## Overview
 
-Investigating stable matching markets under various preference correlation structures, extending Potukuchi & Singh (2024). Implements Gale-Shapley with uniform random preferences as baseline.
+Investigating stable matching markets under various preference correlation structures, extending Potukuchi & Singh (2024). Implements on-demand deferred acceptance with partial preferences for imbalanced markets (m proposers > n receivers).
 
 ## Next Steps
 

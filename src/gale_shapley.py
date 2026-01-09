@@ -1,43 +1,85 @@
-def gale_shapley(proposers_prefs, receivers_prefs):
-    n = len(proposers_prefs)
-    m = len(receivers_prefs)
+import numpy as np
+from collections import deque
+
+class Proposer:
+    def __init__(self, id, d, rng):
+        self.id = id
+        self.d = d
+        self.rng = rng
+        self.proposed_to = set()
+        self.proposals_order = []
+        self.matched_to = None
     
-    # precompute ranks for efficiency
-    recv_rank = []
-    for r in range(m):
-        recv_rank.append({p: rank for rank, p in enumerate(receivers_prefs[r])})
+    def can_propose(self):
+        return len(self.proposed_to) < self.d
     
-    free = list(range(n))
-    next_prop = [0] * n
-    recv_match = {}
-    
-    while free:
-        p = free.pop()
-        if next_prop[p] >= len(proposers_prefs[p]):
-            continue
-            
-        r = proposers_prefs[p][next_prop[p]]
-        next_prop[p] += 1
+    def next_receiver(self, n_receivers):
+        if not self.can_propose():
+            return None
         
-        if r not in recv_match:
-            recv_match[r] = p
-        else:
-            curr = recv_match[r]
-            if recv_rank[r].get(p, float('inf')) < recv_rank[r].get(curr, float('inf')):
-                recv_match[r] = p
-                if next_prop[curr] < len(proposers_prefs[curr]):
-                    free.append(curr)
-            else:
-                if next_prop[p] < len(proposers_prefs[p]):
-                    free.append(p)
+        while True:
+            r = self.rng.integers(0, n_receivers)
+            if r not in self.proposed_to:
+                self.proposed_to.add(r)
+                self.proposals_order.append(r)
+                return r
+
+class Receiver:
+    def __init__(self, id, rng):
+        self.id = id
+        self.rng = rng
+        self.matched_to = None
+        self.scores = {}
     
-    return {p: r for r, p in recv_match.items()}
+    def score_for(self, p_id):
+        if p_id not in self.scores:
+            self.scores[p_id] = self.rng.random()
+        return self.scores[p_id]
+    
+    def prefers(self, new_p, cur_p):
+        return self.score_for(new_p) < self.score_for(cur_p)
 
-
-if __name__ == "__main__":
-    # quick test
-    props = [[0, 1], [1, 0]]
-    recvs = [[1, 0], [0, 1]]
-    m = gale_shapley(props, recvs)
-    print(f"test matching: {m}")
+class DeferredAcceptanceMarket:
+    def __init__(self, m, n, d, seed=0):
+        self.m = m
+        self.n = n
+        self.d = d
+        self.seed = seed
+        
+        # seed splitting for reproducibility
+        master_rng = np.random.default_rng(seed)
+        prop_seeds = master_rng.integers(0, 2**31, size=m)
+        recv_seeds = master_rng.integers(0, 2**31, size=n)
+        
+        self.proposers = [Proposer(i, d, np.random.default_rng(prop_seeds[i])) for i in range(m)]
+        self.receivers = [Receiver(j, np.random.default_rng(recv_seeds[j])) for j in range(n)]
+    
+    def run(self):
+        free_queue = deque(range(self.m))
+        
+        while free_queue:
+            p_id = free_queue.popleft()
+            p = self.proposers[p_id]
+            
+            r_id = p.next_receiver(self.n)
+            if r_id is None:
+                continue
+            
+            r = self.receivers[r_id]
+            
+            if r.matched_to is None:
+                p.matched_to = r_id
+                r.matched_to = p_id
+            else:
+                cur = r.matched_to
+                if r.prefers(p_id, cur):
+                    self.proposers[cur].matched_to = None
+                    free_queue.append(cur)
+                    p.matched_to = r_id
+                    r.matched_to = p_id
+                else:
+                    if p.can_propose():
+                        free_queue.append(p_id)
+        
+        return {p.id: p.matched_to for p in self.proposers if p.matched_to is not None}
 
