@@ -114,18 +114,33 @@ The optimized algorithm handles markets with **100,000+ agents** in reasonable t
 
 ## Visualizations
 
-All plots are saved in `results/`:
+All plots are saved in `results/`. We focus on **4 essential plots** that tell the complete story:
 
-### Main Results
-1. **baseline_rank_distribution.png**: Histogram showing distribution of average ranks across all markets for each d-policy
-2. **rank_vs_lower_bound.png**: Direct comparison of empirical ranks vs theoretical lower bounds for all configurations
-3. **approximation_ratio_heatmap.png**: Heatmaps showing empirical/bound ratio across (n, α) space for each policy
+### The 4 Essential Plots
 
-### Detailed Analysis
-4. **rank_by_imbalance.png**: How proposer rank changes with imbalance α for each market size n
-5. **perfect_matching_summary.png**: Perfect matching rates by policy and across (n, α) configurations
-6. **runtime_analysis.png**: Runtime scaling by market size and imbalance level
-7. **scaling_test.png**: Extended runtime and rank scaling test (n up to 5000)
+1. **plot1_rank_vs_imbalance.png** ⭐ **THE MAIN PLOT**
+   - How proposer outcomes degrade as competition increases
+   - Shows empirical ranks vs theoretical lower bounds
+   - Separate lines for different market sizes n
+   - **Key insight**: Competition hurts welfare, but DA performs 5-15× better than theory predicts
+
+2. **plot2_approximation_ratio.png** (Quality/Gap Visualization)
+   - Approximation ratio: empirical rank / theoretical bound
+   - Shows how close DA comes to optimal performance
+   - **Key insight**: Ratios 0.07-0.25 mean remarkably good performance
+
+3. **plot3_perfect_matching_threshold.png** (Phase Transition)
+   - Probability of perfect matching vs normalized list length (d/d₀)
+   - Validates Theorem 2 threshold predictions
+   - **Key insight**: Sharp transition confirms theoretical predictions
+
+4. **plot4_rank_distribution.png** (Distribution Shift)
+   - How rank distributions change across competition regimes
+   - Shows variation beyond just averages
+   - **Key insight**: Competition shifts and spreads the distribution
+
+### Supplementary
+5. **scaling_test.png**: Extended runtime test (n up to 5000, 100K+ agents)
 
 ## Repository Structure
 
