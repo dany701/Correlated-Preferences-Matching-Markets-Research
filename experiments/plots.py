@@ -42,17 +42,16 @@ def plot_1_rank_by_imbalance(df):
             if n_data.empty:
                 continue
             
-            # Plot empirical rank with error bars
+            # Plot empirical rank with error bars (solid line)
             axes[idx].errorbar(n_data['alpha'], n_data['avg_proposer_rank'],
                               yerr=n_data['std_proposer_rank'],
                               marker='o', linewidth=2.5, markersize=8,
-                              label=f'n={n_val} (empirical)', 
-                              color=color, capsize=4, alpha=0.9)
+                              label=f'n={n_val}', 
+                              color=color, capsize=4, alpha=0.9, linestyle='-')
             
-            # Overlay theoretical lower bound (dashed)
+            # Overlay theoretical lower bound (dashed, no label since we'll add legend separately)
             axes[idx].plot(n_data['alpha'], n_data['lb_rank'],
-                          linestyle='--', linewidth=2, color=color, alpha=0.6,
-                          label=f'n={n_val} (bound)')
+                          linestyle='--', linewidth=2, color=color, alpha=0.6)
             
             # Add regime labels to data points
             for _, row in n_data.iterrows():
@@ -64,10 +63,22 @@ def plot_1_rank_by_imbalance(df):
                                   bbox=dict(boxstyle='round,pad=0.3', 
                                           facecolor=color, alpha=0.2, edgecolor='none'))
         
+        # Add custom legend entries for line styles
+        from matplotlib.lines import Line2D
+        legend_elements = axes[idx].get_legend_handles_labels()[0]
+        legend_labels = axes[idx].get_legend_handles_labels()[1]
+        
+        # Add explanation for line styles
+        legend_elements.extend([
+            Line2D([0], [0], color='gray', linewidth=2.5, linestyle='-', label='Empirical'),
+            Line2D([0], [0], color='gray', linewidth=2, linestyle='--', alpha=0.6, label='Theoretical Bound')
+        ])
+        legend_labels.extend(['— Empirical', '- - Theoretical Bound'])
+        
         axes[idx].set_xlabel('Imbalance α = m/n - 1', fontsize=12, fontweight='bold')
         axes[idx].set_ylabel('Average Proposer Rank', fontsize=12, fontweight='bold')
         axes[idx].set_title(f'{d_policy}', fontsize=13, fontweight='bold')
-        axes[idx].legend(fontsize=9, loc='best')
+        axes[idx].legend(legend_elements, legend_labels, fontsize=9, loc='best')
         axes[idx].grid(alpha=0.3, linestyle=':')
         
         # Add regime shading with labels
@@ -128,12 +139,12 @@ def plot_2_gap_visualization(df):
         
         # Add horizontal line at ratio=1 (optimal)
         axes[idx].axhline(1.0, color='red', linestyle='--', linewidth=2, 
-                         alpha=0.7, label='Optimal (ratio=1)')
+                         alpha=0.7, label='Ratio=1 (optimal)')
         
         axes[idx].set_xlabel('Imbalance α = m/n - 1', fontsize=12, fontweight='bold')
         axes[idx].set_ylabel('Approximation Ratio (Empirical / Bound)', fontsize=12, fontweight='bold')
         axes[idx].set_title(f'{d_policy}', fontsize=13, fontweight='bold')
-        axes[idx].legend(fontsize=9, loc='best')
+        axes[idx].legend(fontsize=9, loc='upper right')
         axes[idx].grid(alpha=0.3, linestyle=':')
         axes[idx].set_ylim([0, max(df['ratio'].max() * 1.1, 0.3)])
         
