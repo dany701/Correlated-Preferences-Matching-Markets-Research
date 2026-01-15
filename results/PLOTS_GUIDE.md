@@ -6,7 +6,12 @@ All visualizations are generated from 27 experimental configurations:
 - **α** ∈ {2.0, 7.0, 15.0} (imbalance levels: m/n - 1)
 - **d-policies**: d=2ln(n), d=6ln(n), d=(ln(n))²
 
-This project focuses on **4 essential plots** that tell the complete story of strongly imbalanced matching markets.
+This project focuses on **3 essential plots** that tell the complete story of strongly imbalanced matching markets.
+
+**Each data point is labeled with its regime:**
+- **Small** imbalance: α ≤ 3 (green shading)
+- **Medium** imbalance: 4 ≤ α ≤ 8 (yellow shading)
+- **Large** imbalance: α ≥ 11 (red shading)
 
 ---
 
@@ -30,12 +35,14 @@ How proposer outcomes degrade as competition increases.
 - Empirical results significantly better than theoretical bounds
 - Gap between empirical and bound varies with n and d
 - Lower ranks = better welfare for proposers
+- **Each point labeled:** Small/Medium/Large regime for easy identification
 
 **Interpretation:**
 This is the **core result** of the study. It directly demonstrates:
 1. The stark effect of competition on proposer welfare
 2. How close the DA algorithm comes to theoretical optimum
 3. Whether the quality gap grows or stabilizes with imbalance
+4. How regime classification (Small/Medium/Large) maps to outcomes
 
 **👉 If you only look at one plot, look at this one.**
 
@@ -59,13 +66,14 @@ How close empirical results are to the theoretical lower bound.
 - Means empirical results are **5-15× better** than theoretical worst case
 - Higher imbalance (larger α) → **lower ratios** (closer to bound)
 - Larger n generally gives better ratios
+- **Each point labeled:** Small/Medium/Large for regime identification
 
 **Interpretation:**
 This answers: **"How much worse than the best possible outcome are we?"**
 
 Values < 1 mean we're doing better than the theoretical lower bound predicts (bound is pessimistic). Lower ratios = better relative performance.
 
-This plot justifies why we compute the lower bound at all—it shows DA performs remarkably well even in adversarial competitive settings.
+The regime labels show how quality varies: Small markets may have higher ratios (more variation from bound), while Large markets show more consistent performance relative to theory.
 
 ---
 
@@ -96,39 +104,6 @@ This is the **feasibility side** of the story. It shows:
 4. Simulations reproduce theoretical predictions
 
 This connects directly to **Theorem 2** and validates the threshold theory.
-
----
-
-## Plot 4: Rank Distribution Shift
-
-**File:** `plot4_rank_distribution.png`
-
-**What it shows:**
-How the distribution of proposer ranks changes across competition regimes.
-
-**Design:**
-- **X-axis:** Proposer rank
-- **Y-axis:** Density (normalized histogram)
-- **Three overlaid distributions:**
-  - Blue: Small α = 2
-  - Orange: Medium α = 7
-  - Red: Large α = 15
-- **Dashed lines:** Mean for each regime
-- Aggregated over all n and d-policies
-
-**Key insights:**
-- Distribution shifts **right** as competition increases
-- Spread (variance) increases with α
-- Tails get heavier in high-competition markets
-- Averages alone don't show the full picture
-
-**Interpretation:**
-While Plots 1-2 focus on averages, this shows **individual outcome variation**:
-- In low competition, most proposers get top choices
-- In high competition, outcomes are more varied
-- Some proposers still succeed, but many face worse outcomes
-
-This is the **intuitive/visual plot**—great for presentations to show how competition affects the distribution of individual experiences.
 
 ---
 
@@ -177,11 +152,10 @@ It demonstrates:
 
 ---
 
-## Summary: The 4-Plot Story
+## Summary: The 3-Plot Story
 
-1. **Plot 1 (Main):** Competition hurts proposer welfare, but not as badly as theory predicts
-2. **Plot 2 (Quality):** DA performs 5-15× better than theoretical lower bound
-3. **Plot 3 (Feasibility):** Phase transition validates threshold theory
-4. **Plot 4 (Distribution):** Individual outcomes vary widely, especially under high competition
+1. **Plot 1 (Main):** Competition hurts proposer welfare, but not as badly as theory predicts — with clear regime labels showing Small/Medium/Large imbalance effects
+2. **Plot 2 (Quality):** DA performs 5-15× better than theoretical lower bound — regime labels show how quality varies across competition levels
+3. **Plot 3 (Feasibility):** Phase transition validates threshold theory — explicit Small/Medium/Large Imbalance curves demonstrate regime-specific behavior
 
-Together, these 4 plots provide a **complete picture** of strongly imbalanced matching markets.
+Together, these 3 plots provide a **complete picture** of strongly imbalanced matching markets, with clear regime identification on every data point.

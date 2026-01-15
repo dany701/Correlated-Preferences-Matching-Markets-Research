@@ -114,33 +114,31 @@ The optimized algorithm handles markets with **100,000+ agents** in reasonable t
 
 ## Visualizations
 
-All plots are saved in `results/`. We focus on **4 essential plots** that tell the complete story:
+All plots are saved in `results/`. We focus on **3 essential plots** that tell the complete story:
 
-### The 4 Essential Plots
+### The 3 Essential Plots
 
 1. **plot1_rank_vs_imbalance.png** ⭐ **THE MAIN PLOT**
    - How proposer outcomes degrade as competition increases
    - Shows empirical ranks vs theoretical lower bounds
    - Separate lines for different market sizes n
+   - Each data point labeled with regime (Small/Medium/Large)
    - **Key insight**: Competition hurts welfare, but DA performs 5-15× better than theory predicts
 
 2. **plot2_approximation_ratio.png** (Quality/Gap Visualization)
    - Approximation ratio: empirical rank / theoretical bound
    - Shows how close DA comes to optimal performance
+   - Data points labeled by regime
    - **Key insight**: Ratios 0.07-0.25 mean remarkably good performance
 
 3. **plot3_perfect_matching_threshold.png** (Phase Transition)
    - Probability of perfect matching vs normalized list length (d/d₀)
+   - Clear labels: Small/Medium/Large Imbalance regimes
    - Validates Theorem 2 threshold predictions
    - **Key insight**: Sharp transition confirms theoretical predictions
 
-4. **plot4_rank_distribution.png** (Distribution Shift)
-   - How rank distributions change across competition regimes
-   - Shows variation beyond just averages
-   - **Key insight**: Competition shifts and spreads the distribution
-
 ### Supplementary
-5. **scaling_test.png**: Extended runtime test (n up to 5000, 100K+ agents)
+4. **scaling_test.png**: Extended runtime test (n up to 5000, 100K+ agents)
 
 ## Repository Structure
 

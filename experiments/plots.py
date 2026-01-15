@@ -7,6 +7,15 @@ def load_results(filename='../results/sweep_results.csv'):
     """load sweep results from csv"""
     return pd.read_csv(filename)
 
+def get_regime_label(alpha):
+    """Get regime label for alpha value."""
+    if alpha <= 3:
+        return "Small"
+    elif alpha <= 8:
+        return "Medium"
+    else:
+        return "Large"
+
 def plot_1_rank_by_imbalance(df):
     """THE MAIN PLOT: How proposer outcomes degrade as competition increases.
     
@@ -44,6 +53,16 @@ def plot_1_rank_by_imbalance(df):
             axes[idx].plot(n_data['alpha'], n_data['lb_rank'],
                           linestyle='--', linewidth=2, color=color, alpha=0.6,
                           label=f'n={n_val} (bound)')
+            
+            # Add regime labels to data points
+            for _, row in n_data.iterrows():
+                regime = get_regime_label(row['alpha'])
+                axes[idx].annotate(regime, 
+                                  xy=(row['alpha'], row['avg_proposer_rank']),
+                                  xytext=(0, 8), textcoords='offset points',
+                                  ha='center', fontsize=7, alpha=0.7,
+                                  bbox=dict(boxstyle='round,pad=0.3', 
+                                          facecolor=color, alpha=0.2, edgecolor='none'))
         
         axes[idx].set_xlabel('Imbalance α = m/n - 1', fontsize=12, fontweight='bold')
         axes[idx].set_ylabel('Average Proposer Rank', fontsize=12, fontweight='bold')
@@ -51,10 +70,19 @@ def plot_1_rank_by_imbalance(df):
         axes[idx].legend(fontsize=9, loc='best')
         axes[idx].grid(alpha=0.3, linestyle=':')
         
-        # Add regime shading
+        # Add regime shading with labels
         axes[idx].axvspan(0, 3, alpha=0.08, color='green')
         axes[idx].axvspan(4, 8, alpha=0.08, color='yellow')
         axes[idx].axvspan(11, 20, alpha=0.08, color='red')
+        
+        # Add regime text labels
+        y_pos = axes[idx].get_ylim()[1] * 0.98
+        axes[idx].text(1.5, y_pos, 'Small', ha='center', va='top', 
+                      fontsize=9, fontweight='bold', alpha=0.6, color='green')
+        axes[idx].text(6, y_pos, 'Medium', ha='center', va='top',
+                      fontsize=9, fontweight='bold', alpha=0.6, color='orange')
+        axes[idx].text(15, y_pos, 'Large', ha='center', va='top',
+                      fontsize=9, fontweight='bold', alpha=0.6, color='red')
     
     plt.suptitle('Rank vs Competition: How Proposer Outcomes Degrade with Imbalance', 
                 fontsize=15, fontweight='bold', y=1.00)
@@ -87,6 +115,16 @@ def plot_2_gap_visualization(df):
             axes[idx].plot(n_data['alpha'], n_data['ratio'],
                           marker='o', linewidth=2.5, markersize=8,
                           label=f'n={n_val}', color=color, alpha=0.9)
+            
+            # Add regime labels to data points
+            for _, row in n_data.iterrows():
+                regime = get_regime_label(row['alpha'])
+                axes[idx].annotate(regime, 
+                                  xy=(row['alpha'], row['ratio']),
+                                  xytext=(0, 8), textcoords='offset points',
+                                  ha='center', fontsize=7, alpha=0.7,
+                                  bbox=dict(boxstyle='round,pad=0.3', 
+                                          facecolor=color, alpha=0.2, edgecolor='none'))
         
         # Add horizontal line at ratio=1 (optimal)
         axes[idx].axhline(1.0, color='red', linestyle='--', linewidth=2, 
@@ -99,10 +137,19 @@ def plot_2_gap_visualization(df):
         axes[idx].grid(alpha=0.3, linestyle=':')
         axes[idx].set_ylim([0, max(df['ratio'].max() * 1.1, 0.3)])
         
-        # Add regime shading
+        # Add regime shading with labels
         axes[idx].axvspan(0, 3, alpha=0.08, color='green')
         axes[idx].axvspan(4, 8, alpha=0.08, color='yellow')
         axes[idx].axvspan(11, 20, alpha=0.08, color='red')
+        
+        # Add regime text labels
+        y_pos = axes[idx].get_ylim()[1] * 0.98
+        axes[idx].text(1.5, y_pos, 'Small', ha='center', va='top', 
+                      fontsize=9, fontweight='bold', alpha=0.6, color='green')
+        axes[idx].text(6, y_pos, 'Medium', ha='center', va='top',
+                      fontsize=9, fontweight='bold', alpha=0.6, color='orange')
+        axes[idx].text(15, y_pos, 'Large', ha='center', va='top',
+                      fontsize=9, fontweight='bold', alpha=0.6, color='red')
     
     plt.suptitle('Quality of Matching: How Close to Theoretical Optimum?', 
                 fontsize=15, fontweight='bold', y=1.00)
@@ -119,9 +166,9 @@ def plot_3_perfect_matching_threshold(df):
     
     n_vals = sorted(df['n'].unique())
     alpha_regimes = {
-        'Small (α=2)': 2.0,
-        'Medium (α=7)': 7.0,
-        'Large (α=15)': 15.0
+        'Small Imbalance (α=2)': 2.0,
+        'Medium Imbalance (α=7)': 7.0,
+        'Large Imbalance (α=15)': 15.0
     }
     
     colors = ['#2E86AB', '#F18F01', '#C73E1D']
@@ -150,7 +197,7 @@ def plot_3_perfect_matching_threshold(df):
         axes[idx].set_xlabel('Normalized List Length (d / d₀)', fontsize=12, fontweight='bold')
         axes[idx].set_ylabel('Perfect Matching Probability', fontsize=12, fontweight='bold')
         axes[idx].set_title(f'n={n_val}', fontsize=13, fontweight='bold')
-        axes[idx].legend(fontsize=9, loc='best')
+        axes[idx].legend(fontsize=10, loc='best')
         axes[idx].grid(alpha=0.3, linestyle=':')
         axes[idx].set_ylim([-0.05, 1.05])
     
@@ -160,72 +207,9 @@ def plot_3_perfect_matching_threshold(df):
     plt.savefig('../results/plot3_perfect_matching_threshold.png', dpi=150, bbox_inches='tight')
     print('✓ Plot 3: Perfect Matching Threshold (Phase Transition)')
 
-def plot_4_rank_distribution_by_competition(df):
-    """Distribution of proposer ranks across competition regimes.
-    
-    Shows how the distribution shifts and spreads as α increases.
-    Aggregates over all n values for clarity.
-    """
-    plt.figure(figsize=(12, 7))
-    
-    # Define competition regimes
-    regimes = {
-        'Small α=2': 2.0,
-        'Medium α=7': 7.0,
-        'Large α=15': 15.0
-    }
-    
-    colors = ['#2E86AB', '#F18F01', '#C73E1D']
-    
-    # We'll aggregate ranks across all configurations for each α
-    # Since we only have avg_rank per config, we'll create approximate distributions
-    # by using the mean and std to generate samples (assuming normal for visualization)
-    
-    for (regime_name, alpha_val), color in zip(regimes.items(), colors):
-        alpha_data = df[df['alpha'] == alpha_val]
-        
-        # Get all ranks and std for this α
-        ranks = []
-        for _, row in alpha_data.iterrows():
-            # Generate samples from normal distribution for visualization
-            # (in reality, you'd collect all individual proposer ranks from trials)
-            mean = row['avg_proposer_rank']
-            std = row['std_proposer_rank']
-            n_samples = 1000
-            samples = np.random.normal(mean, std, n_samples)
-            samples = samples[samples > 0]  # ranks must be positive
-            ranks.extend(samples)
-        
-        # Plot KDE / histogram
-        plt.hist(ranks, bins=50, alpha=0.3, color=color, density=True, 
-                edgecolor='none', label=f'{regime_name} (histogram)')
-        
-        # Add mean line
-        mean_rank = np.mean(ranks)
-        plt.axvline(mean_rank, color=color, linestyle='--', linewidth=3, 
-                   alpha=0.9, label=f'{regime_name} mean={mean_rank:.1f}')
-    
-    plt.xlabel('Proposer Rank', fontsize=13, fontweight='bold')
-    plt.ylabel('Density', fontsize=13, fontweight='bold')
-    plt.title('Rank Distribution Shifts with Competition\n(Aggregated across all n and d-policies)', 
-             fontsize=15, fontweight='bold')
-    plt.legend(fontsize=11, loc='upper right')
-    plt.grid(alpha=0.3, linestyle=':', axis='y')
-    plt.xlim(left=0)
-    
-    # Add text box with interpretation
-    textstr = 'As competition increases (α ↑):\n• Distribution shifts right\n• Spread increases\n• Average worsens'
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.8)
-    plt.text(0.02, 0.98, textstr, transform=plt.gca().transAxes, fontsize=11,
-            verticalalignment='top', bbox=props)
-    
-    plt.tight_layout()
-    plt.savefig('../results/plot4_rank_distribution.png', dpi=150, bbox_inches='tight')
-    print('✓ Plot 4: Rank Distribution by Competition')
-
 if __name__ == "__main__":
     print('='*70)
-    print('GENERATING 4 ESSENTIAL PLOTS')
+    print('GENERATING 3 ESSENTIAL PLOTS')
     print('='*70)
     
     print('\nLoading results...')
@@ -243,13 +227,11 @@ if __name__ == "__main__":
     plot_1_rank_by_imbalance(df)
     plot_2_gap_visualization(df)
     plot_3_perfect_matching_threshold(df)
-    plot_4_rank_distribution_by_competition(df)
     
     print('-'*70)
-    print('\n✓ All 4 essential plots generated successfully!')
+    print('\n✓ All 3 essential plots generated successfully!')
     print('\nPlots saved:')
     print('  1. plot1_rank_vs_imbalance.png       (THE MAIN PLOT)')
     print('  2. plot2_approximation_ratio.png     (Quality/Gap)')
     print('  3. plot3_perfect_matching_threshold.png (Phase Transition)')
-    print('  4. plot4_rank_distribution.png       (Distribution Shift)')
     print('='*70)
