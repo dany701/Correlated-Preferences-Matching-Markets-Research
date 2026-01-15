@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project investigates **strongly imbalanced** random matching markets where the number of proposers significantly exceeds the number of receivers (α = m/n - 1 > 1). We implement an **on-demand Deferred Acceptance (Gale-Shapley) algorithm** with partial preference lists to study:
+This project investigates **strongly imbalanced** random matching markets with **i.i.d. uniform preferences** where the number of proposers significantly exceeds the number of receivers (α = m/n - 1 > 1). We implement an **optimized Deferred Acceptance (Gale-Shapley) algorithm** with partial (truncated) preference lists to study:
 
 1. Phase transitions for perfect stable matching existence
 2. Proposer rank degradation under competition
@@ -22,14 +22,16 @@ This project investigates **strongly imbalanced** random matching markets where 
 
 ## Implementation Highlights
 
-### Optimized On-Demand Algorithm
+### Optimized Deferred Acceptance Algorithm
 
 Our implementation features several key optimizations:
 
-- **Pre-generated preferences**: Each proposer samples d unique receivers at initialization using `numpy.choice(replace=False)`, eliminating rejection sampling bottleneck
-- **Lazy receiver preferences**: Receivers generate scores on-demand only when needed
+- **Pre-sampled proposer preferences**: Each proposer samples d unique receivers at initialization using `numpy.choice(replace=False)`, eliminating rejection sampling bottleneck during the algorithm
+- **On-demand receiver preferences**: Receivers generate random scores lazily (only when a proposer proposes), implementing true i.i.d. uniform preferences
 - **Efficient data structures**: Numpy arrays for fast indexing and lookups
 - **Reproducible randomness**: Hierarchical seed splitting ensures reproducibility
+
+**Note:** "Partial preferences" refers to proposers only having length-d truncated lists, not full rankings over all n receivers.
 
 ### Theoretical Benchmarks
 
