@@ -1,0 +1,84 @@
+============================================================
+STRONGLY IMBALANCED MATCHING MARKETS EXPERIMENT
+============================================================
+*** FAST 3×3×3 TEST CONFIGURATION ***
+n_values (receivers): [100, 500, 1500]
+alpha_values (imbalance): [2.0, 7.0, 15.0]
+d_policies: log_c2, log_c6, logsq_c1.0
+Total configurations: 27 = 27
+
+Design:
+  n=100   (small market)
+  n=500   (medium market)
+  n=1500  (large market)
+
+  α=2.0   (small imbalance, m/n=3)
+  α=7.0   (medium imbalance, m/n=8)
+  α=15.0  (large imbalance, m/n=16)
+============================================================
+
+[1/27] n=100, alpha=2.00, d=10 (log_c2), m=300
+  perfect_rate=1.00, avg_rank=5.17, trials=30
+[2/27] n=100, alpha=2.00, d=28 (log_c6), m=300
+  perfect_rate=1.00, avg_rank=13.42, trials=30
+[3/27] n=100, alpha=2.00, d=22 (logsq_c1.0), m=300
+  perfect_rate=1.00, avg_rank=10.84, trials=30
+[4/27] n=100, alpha=7.00, d=10 (log_c2), m=800
+  perfect_rate=1.00, avg_rank=5.41, trials=30
+[5/27] n=100, alpha=7.00, d=28 (log_c6), m=800
+  perfect_rate=1.00, avg_rank=14.25, trials=30
+[6/27] n=100, alpha=7.00, d=22 (logsq_c1.0), m=800
+  perfect_rate=1.00, avg_rank=11.27, trials=30
+[7/27] n=100, alpha=15.00, d=10 (log_c2), m=1600
+  perfect_rate=1.00, avg_rank=5.42, trials=30
+[8/27] n=100, alpha=15.00, d=28 (log_c6), m=1600
+  perfect_rate=1.00, avg_rank=14.52, trials=30
+[9/27] n=100, alpha=15.00, d=22 (logsq_c1.0), m=1600
+  perfect_rate=1.00, avg_rank=11.30, trials=30
+[10/27] n=500, alpha=2.00, d=13 (log_c2), m=1500
+  perfect_rate=1.00, avg_rank=6.56, trials=30
+[11/27] n=500, alpha=2.00, d=38 (log_c6), m=1500
+  perfect_rate=1.00, avg_rank=18.18, trials=30
+[12/27] n=500, alpha=2.00, d=39 (logsq_c1.0), m=1500
+  perfect_rate=1.00, avg_rank=18.80, trials=30
+[13/27] n=500, alpha=7.00, d=13 (log_c2), m=4000
+  perfect_rate=1.00, avg_rank=6.87, trials=30
+[14/27] n=500, alpha=7.00, d=38 (log_c6), m=4000
+  perfect_rate=1.00, avg_rank=19.19, trials=30
+[15/27] n=500, alpha=7.00, d=39 (logsq_c1.0), m=4000
+  perfect_rate=1.00, avg_rank=19.43, trials=30
+[16/27] n=500, alpha=15.00, d=13 (log_c2), m=8000
+  perfect_rate=1.00, avg_rank=6.93, trials=30
+[17/27] n=500, alpha=15.00, d=38 (log_c6), m=8000
+  perfect_rate=1.00, avg_rank=19.40, trials=30
+[18/27] n=500, alpha=15.00, d=39 (logsq_c1.0), m=8000
+  perfect_rate=1.00, avg_rank=19.80, trials=30
+[19/27] n=1500, alpha=2.00, d=15 (log_c2), m=4500
+  perfect_rate=1.00, avg_rank=7.49, trials=30
+[20/27] n=1500, alpha=2.00, d=44 (log_c6), m=4500
+  perfect_rate=1.00, avg_rank=21.05, trials=30
+[21/27] n=1500, alpha=2.00, d=54 (logsq_c1.0), m=4500
+  perfect_rate=1.00, avg_rank=25.56, trials=30
+[22/27] n=1500, alpha=7.00, d=15 (log_c2), m=12000
+  perfect_rate=1.00, avg_rank=7.84, trials=30
+[23/27] n=1500, alpha=7.00, d=44 (log_c6), m=12000
+  perfect_rate=1.00, avg_rank=22.09, trials=30
+[24/27] n=1500, alpha=7.00, d=54 (logsq_c1.0), m=12000
+  perfect_rate=1.00, avg_rank=26.92, trials=30
+[25/27] n=1500, alpha=15.00, d=15 (log_c2), m=24000
+  perfect_rate=1.00, avg_rank=7.90, trials=30
+[26/27] n=1500, alpha=15.00, d=44 (log_c6), m=24000
+  perfect_rate=1.00, avg_rank=22.21, trials=30
+[27/27] n=1500, alpha=15.00, d=54 (logsq_c1.0), m=24000
+  perfect_rate=1.00, avg_rank=27.17, trials=30
+
+saved results to ../results/sweep_results.csv
+
+============================================================
+SWEEP COMPLETE
+============================================================
+Total configurations tested: 27
+Results saved to: results/sweep_results.csv
+
+Next step: python plots.py to generate visualizations
+============================================================

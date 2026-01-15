@@ -22,7 +22,7 @@ def run_single_trial(m, n, d, seed):
     ranks = []
     for p_id, r_id in matching.items():
         proposer = market.proposers[p_id]
-        rank = proposer.proposals_order.index(r_id) + 1
+        rank = proposer.get_rank(r_id)
         ranks.append(rank)
     
     avg_rank = np.mean(ranks) if ranks else float('nan')

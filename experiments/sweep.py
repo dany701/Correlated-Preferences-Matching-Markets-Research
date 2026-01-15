@@ -39,12 +39,12 @@ def d_policy_logsq(n, c):
     return max(1, min(n, ceil(c * log(n)**2)))
 
 def get_d_policies():
-    """return list of (policy_name, policy_func) tuples"""
+    """return list of (policy_name, policy_func) tuples - 3 well-separated policies"""
     policies = []
-    for c in [2, 4, 6]:
-        policies.append((f'log_c{c}', lambda n, c=c: d_policy_log(n, c)))
-    for c in [0.5, 1.0, 1.5]:
-        policies.append((f'logsq_c{c}', lambda n, c=c: d_policy_logsq(n, c)))
+    # One low log, one high log, one logsq
+    policies.append(('d=2ln(n)', lambda n: d_policy_log(n, 2)))
+    policies.append(('d=6ln(n)', lambda n: d_policy_log(n, 6)))
+    policies.append(('d=(ln(n))²', lambda n: d_policy_logsq(n, 1.0)))
     return policies
 
 def run_single_trial(m, n, d, seed):
@@ -60,7 +60,7 @@ def run_single_trial(m, n, d, seed):
     ranks = []
     for p_id, r_id in matching.items():
         proposer = market.proposers[p_id]
-        rank = proposer.proposals_order.index(r_id) + 1
+        rank = proposer.get_rank(r_id)
         ranks.append(rank)
     
     return {
@@ -183,21 +183,47 @@ def save_results_csv(results, filename='../results/sweep_results.csv'):
     print(f'\nsaved results to {filename}')
 
 if __name__ == "__main__":
-    # imbalanced market regimes (alpha > 1 required)
+    # imbalanced market regimes (alpha > 1 required for strong imbalance)
+    # Small imbalance: alpha in [1-2] → m/n in [2-3]
+    # Medium imbalance: alpha in [4-7] → m/n in [5-8]
+    # Large imbalance: alpha in [11-19] → m/n in [12-20]
+    
+    # FAST TEST CONFIGURATION (3×3×3 design, well-separated values)
     config = {
-        'n_values': [500, 1000, 2000],
-        'alpha_values': [1.5, 2, 5, 7, 12, 19],  # small [1-2], medium [4-7], large [11-19]
-        'seed': 0
+        'n_values': [100, 500, 1500],         # small, medium, large markets
+        'alpha_values': [2.0, 7.0, 15.0],     # one per regime, well-separated
+        'seed': 42
     }
     
-    print('starting parameter sweep with functional d-policies...')
-    print(f'n_values: {config["n_values"]}')
-    print(f'alpha_values: {config["alpha_values"]}')
-    print(f'd_policies: log (c=2,4,6), logsq (c=0.5,1.0,1.5)')
+    print('='*60)
+    print('STRONGLY IMBALANCED MATCHING MARKETS EXPERIMENT')
+    print('='*60)
+    print('*** FAST 3×3×3 TEST CONFIGURATION ***')
+    print(f'n_values (receivers): {config["n_values"]}')
+    print(f'alpha_values (imbalance): {config["alpha_values"]}')
+    print(f'd_policies: d=2ln(n), d=6ln(n), d=(ln(n))²')
+    print(f'Total configurations: {len(config["n_values"]) * len(config["alpha_values"]) * 3} = 27')
+    print()
+    print('Design:')
+    print('  n=100   (small market)')
+    print('  n=500   (medium market)')
+    print('  n=1500  (large market)')
+    print()
+    print('  α=2.0   (small imbalance, m/n=3)')
+    print('  α=7.0   (medium imbalance, m/n=8)')
+    print('  α=15.0  (large imbalance, m/n=16)')
+    print('='*60)
     print()
     
     results = parameter_sweep(config)
     
     save_results_csv(results)
     
-    print('\nsweep complete - run plots.py to generate visualizations')
+    print('\n' + '='*60)
+    print('SWEEP COMPLETE')
+    print('='*60)
+    print(f'Total configurations tested: {len(results)}')
+    print('Results saved to: results/sweep_results.csv')
+    print()
+    print('Next step: python plots.py to generate visualizations')
+    print('='*60)

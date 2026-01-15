@@ -24,7 +24,7 @@ def run_demo():
         # compute ranks for this trial
         for p_id, r_id in matching.items():
             p = market.proposers[p_id]
-            rank = p.proposals_order.index(r_id) + 1
+            rank = p.get_rank(r_id)
             all_ranks.append(rank)
         
         total_matched += len(matching)
