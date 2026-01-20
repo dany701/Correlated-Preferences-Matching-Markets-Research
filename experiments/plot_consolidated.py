@@ -49,8 +49,10 @@ def plot_feasibility(df_threshold):
                         ha='center', fontsize=10, fontweight='bold',
                         color=color, alpha=0.9)
     
-    # Reference lines
-    n_range = np.array(sorted(df_threshold['n'].unique()))
+    # Reference lines - smooth curves across full range
+    n_min = df_threshold['n'].min()
+    n_max = df_threshold['n'].max()
+    n_range = np.logspace(np.log10(n_min), np.log10(n_max), 100)
     plt.plot(n_range, np.log(n_range), 'k--', alpha=0.25, linewidth=1.5, label='ln(n)')
     plt.plot(n_range, (np.log(n_range))**2, 'k:', alpha=0.25, linewidth=1.5, label='(ln(n))²')
     
@@ -65,9 +67,11 @@ def plot_feasibility(df_threshold):
     plt.yscale('log')
     
     # Ensure x-axis shows full range including n=5000
-    n_min = df_threshold['n'].min()
-    n_max = df_threshold['n'].max()
-    plt.xlim(n_min * 0.8, n_max * 1.2)
+    plt.xlim(n_min * 0.7, n_max * 1.3)
+    
+    # Explicitly set x-axis ticks to show all n values
+    n_ticks = sorted(df_threshold['n'].unique())
+    plt.xticks(n_ticks, [f'{int(n)}' for n in n_ticks])
     
     # Add insight box
     textstr = 'Key Finding:\nHigher competition (α↑)\n→ Lower d* needed!\n\n(Probabilistic coverage)'
