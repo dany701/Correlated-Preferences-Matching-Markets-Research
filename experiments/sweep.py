@@ -73,25 +73,45 @@ def run_single_trial(m, n, d, seed):
 
 def run_experiments(n, alpha, d, d_policy_name, base_seed, initial_trials=30):
     """run adaptive trials for (n, alpha, d)"""
+    import time
     m = round(n * (1 + alpha))
+    
+    start_time = time.time()
     
     # initial trials
     results = []
+    print(f'    → Running {initial_trials} initial trials...', end='', flush=True)
     for t in range(initial_trials):
+        if t > 0 and t % 10 == 0:
+            elapsed = time.time() - start_time
+            rate = t / elapsed
+            print(f' [{t}/{initial_trials}, {rate:.1f} tr/s]', end='', flush=True)
         seed = base_seed + t
         res = run_single_trial(m, n, d, seed)
         results.append(res)
+    elapsed = time.time() - start_time
+    print(f' ✓ {elapsed:.2f}s', flush=True)
     
     # check if we're in phase transition region
     perfect_rate = np.mean([r['perfect_flag'] for r in results])
+    avg_time_per_trial = elapsed / initial_trials
+    print(f'    → Perfect rate: {perfect_rate:.3f} | Avg time/trial: {avg_time_per_trial*1000:.1f}ms', flush=True)
     
     # adaptive: add more trials if near threshold
     if 0.2 <= perfect_rate <= 0.8:
         additional = 70  # bring total to 100
+        print(f'    → Phase transition! Running {additional} more trials...', end='', flush=True)
         for t in range(additional):
+            if t > 0 and t % 20 == 0:
+                elapsed = time.time() - start_time
+                total_done = initial_trials + t
+                rate = total_done / elapsed
+                print(f' [{t}/{additional}, {rate:.1f} tr/s]', end='', flush=True)
             seed = base_seed + initial_trials + t
             res = run_single_trial(m, n, d, seed)
             results.append(res)
+        elapsed = time.time() - start_time
+        print(f' ✓ {elapsed:.2f}s total', flush=True)
     
     # aggregate
     all_ranks = [r for res in results for r in res['ranks']]
@@ -107,6 +127,7 @@ def run_experiments(n, alpha, d, d_policy_name, base_seed, initial_trials=30):
 
 def parameter_sweep(config):
     """run full sweep with functional d-policies"""
+    import time
     results = []
     
     n_values = config['n_values']
@@ -118,6 +139,7 @@ def parameter_sweep(config):
     
     total = len(n_values) * len(alpha_values) * len(d_policies)
     current = 0
+    sweep_start = time.time()
     
     for n in n_values:
         for alpha in alpha_values:
@@ -127,12 +149,22 @@ def parameter_sweep(config):
                 current += 1
                 d = d_policy_func(n)
                 
-                print(f'[{current}/{total}] n={n}, alpha={alpha:.2f}, d={d} ({d_policy_name}), m={m}')
+                config_start = time.time()
+                print(f'\n[{current}/{total}] n={n}, α={alpha:.1f}, d={d} ({d_policy_name}), m={m}')
                 
                 # unique seed per configuration
                 base_seed = master_rng.integers(0, 2**32 - 1)
                 
                 metrics = run_experiments(n, alpha, d, d_policy_name, base_seed)
+                
+                config_time = time.time() - config_start
+                elapsed_total = time.time() - sweep_start
+                avg_time_per_config = elapsed_total / current
+                eta_seconds = avg_time_per_config * (total - current)
+                
+                print(f'    → Config completed in {config_time:.2f}s | '
+                      f'Total elapsed: {elapsed_total/60:.1f}min | '
+                      f'ETA: {eta_seconds/60:.1f}min')
                 
                 # compute theoretical quantities
                 d0_val = compute_d0(n, alpha)
@@ -161,6 +193,23 @@ def parameter_sweep(config):
                 
                 print(f"  perfect_rate={metrics['perfect_rate']:.2f}, avg_rank={metrics['avg_proposer_rank']:.2f}, trials={metrics['trials']}")
     
+    # Final summary
+    total_time = time.time() - sweep_start
+    print(f'\n{"="*70}')
+    print(f'SWEEP COMPLETED')
+    print(f'{"="*70}')
+    print(f'Total configurations: {total}')
+    print(f'Total time: {total_time/60:.2f} minutes ({total_time:.1f}s)')
+    print(f'Average time per config: {total_time/total:.2f}s')
+    print()
+    print('Scaling Analysis (avg runtime per trial):')
+    for n in n_values:
+        n_results = [r for r in results if r['n'] == n]
+        if n_results:
+            avg_runtime = np.mean([r['runtime_mean'] for r in n_results])
+            print(f'  n={n:5d}: {avg_runtime*1000:7.2f}ms')
+    print()
+    
     return results
 
 def save_results_csv(results, filename='../results/sweep_results.csv'):
@@ -188,9 +237,9 @@ if __name__ == "__main__":
     # Medium imbalance: alpha in [4-7] → m/n in [5-8]
     # Large imbalance: alpha in [11-19] → m/n in [12-20]
     
-    # FAST TEST CONFIGURATION (3×3×3 design, well-separated values)
+    # TEST CONFIGURATION (3×4×3 design, well-separated values)
     config = {
-        'n_values': [100, 500, 1500],         # small, medium, large markets
+        'n_values': [100, 500, 1500, 5000],   # small, medium, large, very large markets
         'alpha_values': [2.0, 7.0, 15.0],     # one per regime, well-separated
         'seed': 42
     }
@@ -198,16 +247,17 @@ if __name__ == "__main__":
     print('='*60)
     print('STRONGLY IMBALANCED MATCHING MARKETS EXPERIMENT')
     print('='*60)
-    print('*** FAST 3×3×3 TEST CONFIGURATION ***')
+    print('*** TEST CONFIGURATION (4 n-values × 3 α × 3 d-policies) ***')
     print(f'n_values (receivers): {config["n_values"]}')
     print(f'alpha_values (imbalance): {config["alpha_values"]}')
     print(f'd_policies: d=2ln(n), d=6ln(n), d=(ln(n))²')
-    print(f'Total configurations: {len(config["n_values"]) * len(config["alpha_values"]) * 3} = 27')
+    print(f'Total configurations: {len(config["n_values"]) * len(config["alpha_values"]) * 3} = 36')
     print()
     print('Design:')
-    print('  n=100   (small market)')
-    print('  n=500   (medium market)')
-    print('  n=1500  (large market)')
+    print('  n=100    (small market)')
+    print('  n=500    (medium market)')
+    print('  n=1500   (large market)')
+    print('  n=5000   (very large market)')
     print()
     print('  α=2.0   (small imbalance, m/n=3)')
     print('  α=7.0   (medium imbalance, m/n=8)')

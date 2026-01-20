@@ -116,10 +116,11 @@ def plot_quality(df_sweep):
         labels.extend(['— Empirical', '- - Theory Bound'])
         
         axes[idx].set_xlabel('Imbalance α = m/n - 1', fontsize=11, fontweight='bold')
-        axes[idx].set_ylabel('Average Proposer Rank', fontsize=11, fontweight='bold')
+        axes[idx].set_ylabel('Average Proposer Rank (log scale)', fontsize=11, fontweight='bold')
         axes[idx].set_title(f'{d_policy}', fontsize=12, fontweight='bold')
-        axes[idx].legend(handles, labels, fontsize=8, loc='best')
-        axes[idx].grid(alpha=0.3, linestyle=':')
+        axes[idx].legend(handles, labels, fontsize=8, loc='upper left')
+        axes[idx].grid(alpha=0.3, linestyle=':', which='both')
+        axes[idx].set_yscale('log')  # LOG SCALE to see empirical differences clearly
         
         # Regime shading
         axes[idx].axvspan(0, 3, alpha=0.06, color=REGIME_COLORS['Small'])
