@@ -19,6 +19,12 @@ REGIME_COLORS = {
     'Large': '#C73E1D'    # Red
 }
 
+def compute_d0(n, alpha):
+    """Theoretical threshold d0(n, alpha) for perfect matching"""
+    numerator = (1 + alpha)
+    denominator = alpha + 1 / (n * (1 + alpha))
+    return log(n) * log(numerator / denominator)
+
 def plot_feasibility(df_threshold):
     """
     QUESTION 1: FEASIBILITY
@@ -35,13 +41,21 @@ def plot_feasibility(df_threshold):
         alpha = regime_data['alpha'].iloc[0]
         color = REGIME_COLORS[regime]
         
-        # Plot d* vs n
+        # Plot empirical d* vs n (solid line)
         plt.plot(regime_data['n'], regime_data['d_star'],
                 marker='o', linewidth=3, markersize=12,
-                label=f'{regime} Imbalance (α={alpha:.1f})',
+                label=f'{regime} (α={alpha:.1f}) - Empirical d*',
                 color=color, alpha=0.9)
         
-        # Add value labels
+        # Plot theoretical d0 vs n (dashed line)
+        n_smooth = np.logspace(np.log10(regime_data['n'].min()), 
+                               np.log10(regime_data['n'].max()), 50)
+        d0_values = [compute_d0(n, alpha) for n in n_smooth]
+        plt.plot(n_smooth, d0_values, '--',
+                linewidth=2, color=color, alpha=0.5,
+                label=f'{regime} (α={alpha:.1f}) - Theory d₀')
+        
+        # Add value labels for empirical d*
         for _, row in regime_data.iterrows():
             plt.annotate(f"{row['d_star']}", 
                         xy=(row['n'], row['d_star']),
