@@ -64,6 +64,11 @@ def plot_feasibility(df_threshold):
     plt.xscale('log')
     plt.yscale('log')
     
+    # Ensure x-axis shows full range including n=5000
+    n_min = df_threshold['n'].min()
+    n_max = df_threshold['n'].max()
+    plt.xlim(n_min * 0.8, n_max * 1.2)
+    
     # Add insight box
     textstr = 'Key Finding:\nHigher competition (α↑)\n→ Lower d* needed!\n\n(Probabilistic coverage)'
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.85)
