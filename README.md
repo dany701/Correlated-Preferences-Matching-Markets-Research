@@ -114,31 +114,49 @@ The optimized algorithm handles markets with **100,000+ agents** in reasonable t
 
 ## Visualizations
 
-All plots are saved in `results/`. We focus on **3 essential plots** that tell the complete story:
+**Three questions, three figures** — a clean narrative for the complete story.
 
-### The 3 Essential Plots
+### The Three Essential Figures
 
-1. **plot1_rank_vs_imbalance.png** ⭐ **THE MAIN PLOT**
-   - How proposer outcomes degrade as competition increases
-   - Shows empirical ranks vs theoretical lower bounds
-   - Separate lines for different market sizes n
-   - Each data point labeled with regime (Small/Medium/Large)
-   - **Key insight**: Competition hurts welfare, but DA performs 5-15× better than theory predicts
+#### **Figure 1: FEASIBILITY** — Threshold for Perfect Matching
+**File:** `figure1_feasibility.png`
 
-2. **plot2_approximation_ratio.png** (Quality/Gap Visualization)
-   - Approximation ratio: empirical rank / theoretical bound
-   - Shows how close DA comes to optimal performance
-   - Data points labeled by regime
-   - **Key insight**: Ratios 0.07-0.25 mean remarkably good performance
+**Question:** At what list length d* does perfect matching emerge?
 
-3. **plot3_perfect_matching_threshold.png** (Phase Transition)
-   - Probability of perfect matching vs normalized list length (d/d₀)
-   - Clear labels: Small/Medium/Large Imbalance regimes
-   - Validates Theorem 2 threshold predictions
-   - **Key insight**: Sharp transition confirms theoretical predictions
+**Key finding:** Higher competition → Lower d* needed! (counterintuitive)
+- Small imbalance (α=1.5): d* ≈ 4-5
+- Medium imbalance (α=7.0): d* ≈ 1-2
+- Large imbalance (α=15.0): d* ≈ 1
 
-### Supplementary
-4. **scaling_test.png**: Extended runtime test (n up to 5000, 100K+ agents)
+**Why:** Probabilistic coverage — more proposers provide better receiver coverage even with short lists.
+
+---
+
+#### **Figure 2: QUALITY** — Rank Degradation with Competition  
+**File:** `figure2_quality.png`
+
+**Question:** How do proposer outcomes degrade with competition?
+
+**Key findings:**
+- Rank increases moderately with α (5-7 → 7-8 even with 5× more proposers)
+- Empirical ranks **5-15× better** than theoretical lower bounds
+- Effect of list length (d) dominates effect of competition (α)
+
+**Shows:** Solid lines = empirical, dashed = theory bound. Gap demonstrates DA's excellent performance.
+
+---
+
+#### **Figure 3: SCALING** — Runtime Growth with Market Size
+**File:** `figure3_scaling.png`
+
+**Question:** How does runtime grow with n?
+
+**Key findings:**
+- Scales ~O(m·d) as expected
+- n=5000, α=19 (80K agents): 10.9 seconds
+- Algorithm is practical for real-world markets
+
+**Shows:** Log-log plot demonstrating manageable super-linear growth.
 
 ## Repository Structure
 
