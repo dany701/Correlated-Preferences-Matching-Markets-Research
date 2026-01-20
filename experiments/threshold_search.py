@@ -25,9 +25,10 @@ ALPHA_REGIMES = {
     'Medium': 7.0,
     'Large': 15.0
 }
-P0_TARGET = 0.8  # Probability threshold for "success"
+P0_TARGET = 0.8  # Probability threshold for "success" (configurable)
 MASTER_SEED = 42
 TIMEOUT_PER_TRIAL = 30  # seconds
+FINAL_CONFIRMATION_TRIALS = 100  # Final confirmation trials (increased from 50)
 
 # ============================================================================
 # CORE SUBROUTINE: PERFECT MATCHING TEST
@@ -38,13 +39,14 @@ def estimate_perfect_rate(n, alpha, d, trials, seed, verbose=False):
     Estimate probability of perfect matching for given (n, alpha, d).
     
     Returns:
-        (perfect_rate, trials_used, early_stop)
+        (perfect_rate, trials_used, early_stop, timeouts)
     """
     m = round(n * (1 + alpha))
     rng = np.random.default_rng(seed)
     
     successes = 0
     trials_used = 0
+    timeouts = 0  # Track timeout occurrences
     start_time = time.time()
     last_print = start_time
     
@@ -73,7 +75,8 @@ def estimate_perfect_rate(n, alpha, d, trials, seed, verbose=False):
             
             # Timeout check
             if time.time() - trial_start > TIMEOUT_PER_TRIAL:
-                print(f"      WARNING: trial {t} exceeded {TIMEOUT_PER_TRIAL}s timeout")
+                print(f"      TIMEOUT: trial {t} exceeded {TIMEOUT_PER_TRIAL}s")
+                timeouts += 1
                 break
                 
         except Exception as e:
@@ -88,16 +91,16 @@ def estimate_perfect_rate(n, alpha, d, trials, seed, verbose=False):
             if current_rate > 0.9 and successes >= 9:
                 if verbose:
                     print(f"      early stop: clearly above threshold ({current_rate:.2f})")
-                return current_rate, trials_used, True
+                return current_rate, trials_used, True, timeouts
             
             # Clearly below threshold
             if current_rate < 0.3 and trials_used >= 10:
                 if verbose:
                     print(f"      early stop: clearly below threshold ({current_rate:.2f})")
-                return current_rate, trials_used, True
+                return current_rate, trials_used, True, timeouts
     
     perfect_rate = successes / trials_used if trials_used > 0 else 0.0
-    return perfect_rate, trials_used, False
+    return perfect_rate, trials_used, False, timeouts
 
 # ============================================================================
 # BRACKETING: FIND INITIAL [d_low, d_high]
@@ -129,8 +132,8 @@ def find_brackets(n, alpha, seed, verbose=False):
         if verbose:
             print(f"    [bracketing] testing d={d} ({i+1}/{len(candidates)})")
         
-        rate, trials, early = estimate_perfect_rate(n, alpha, d, trials=10, 
-                                                     seed=seed+d, verbose=False)
+        rate, trials, early, _ = estimate_perfect_rate(n, alpha, d, trials=10, 
+                                                       seed=seed+d, verbose=False)
         
         if verbose:
             print(f"      → rate={rate:.2f}")
@@ -163,6 +166,7 @@ def binary_search_threshold(n, alpha, d_low, d_high, seed, verbose=False):
         print(f"    [d-search] binary search in [{d_low}, {d_high}]")
     
     total_trials = 0
+    total_timeouts = 0
     step = 0
     
     while d_low < d_high:
@@ -174,18 +178,20 @@ def binary_search_threshold(n, alpha, d_low, d_high, seed, verbose=False):
             print(f"    [d-search] step {step}/{max_steps} | testing d={mid}")
         
         # Start with 10 trials, increase if ambiguous
-        rate, trials, early = estimate_perfect_rate(n, alpha, mid, trials=10,
-                                                    seed=seed+mid*1000, verbose=verbose)
+        rate, trials, early, timeouts = estimate_perfect_rate(n, alpha, mid, trials=10,
+                                                               seed=seed+mid*1000, verbose=verbose)
         total_trials += trials
+        total_timeouts += timeouts
         
         # If ambiguous (near threshold), run more trials
         if not early and 0.4 <= rate <= 0.95:
             if verbose:
                 print(f"      ambiguous result, running 30 more trials...")
-            rate2, trials2, _ = estimate_perfect_rate(n, alpha, mid, trials=30,
-                                                      seed=seed+mid*1000+1000, verbose=verbose)
+            rate2, trials2, _, timeouts2 = estimate_perfect_rate(n, alpha, mid, trials=30,
+                                                                  seed=seed+mid*1000+1000, verbose=verbose)
             rate = (rate * trials + rate2 * trials2) / (trials + trials2)
             total_trials += trials2
+            total_timeouts += timeouts2
         
         if verbose:
             print(f"      final rate={rate:.3f} (target={P0_TARGET})")
@@ -197,14 +203,17 @@ def binary_search_threshold(n, alpha, d_low, d_high, seed, verbose=False):
     
     d_star = d_low
     
-    # Final confirmation with more trials
+    # Final confirmation with 100 trials (as per spec)
     if verbose:
-        print(f"    [d-search] confirming d*={d_star} with 50 trials...")
-    final_rate, trials, _ = estimate_perfect_rate(n, alpha, d_star, trials=50,
-                                                  seed=seed+d_star*10000, verbose=verbose)
+        print(f"    [d-search] confirming d*={d_star} with {FINAL_CONFIRMATION_TRIALS} trials...")
+    final_rate, trials, _, timeouts = estimate_perfect_rate(
+        n, alpha, d_star, trials=FINAL_CONFIRMATION_TRIALS,
+        seed=seed+d_star*10000, verbose=verbose
+    )
     total_trials += trials
+    total_timeouts += timeouts
     
-    return d_star, final_rate, total_trials
+    return d_star, final_rate, total_trials, total_timeouts
 
 # ============================================================================
 # MAIN EXPERIMENT LOOP
@@ -252,24 +261,27 @@ def run_threshold_experiment():
             
             # Binary search for d*
             start_time = time.time()
-            d_star, final_rate, total_trials = binary_search_threshold(
+            d_star, final_rate, total_trials, total_timeouts = binary_search_threshold(
                 n, alpha, d_low, d_high, seed, verbose=True
             )
             elapsed = time.time() - start_time
             
+            timeout_msg = f' | timeouts={total_timeouts}' if total_timeouts > 0 else ''
             print(f'  ✓ RESULT: d* = {d_star} | rate = {final_rate:.3f} | '
-                  f'trials = {total_trials} | time = {elapsed:.1f}s')
+                  f'trials = {total_trials} | time = {elapsed:.1f}s{timeout_msg}')
             print()
             
-            # Store result
+            # Store result (matches spec: n, alpha, m, d_star, p0, trials_used)
             results.append({
                 'regime': regime_name,
                 'alpha': alpha,
                 'n': n,
                 'm': m,
                 'd_star': d_star,
-                'perfect_rate': final_rate,
-                'trials_total': total_trials,
+                'p0_target': P0_TARGET,  # Target probability threshold
+                'perfect_rate': final_rate,  # Achieved rate
+                'trials_used': total_trials,  # Total trials used
+                'timeouts': total_timeouts,  # Timeout occurrences
                 'time_seconds': elapsed
             })
             
@@ -297,8 +309,8 @@ def save_results(results, filename='../results/threshold_results.csv'):
     
     with open(filename, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=[
-            'regime', 'alpha', 'n', 'm', 'd_star', 
-            'perfect_rate', 'trials_total', 'time_seconds'
+            'regime', 'alpha', 'n', 'm', 'd_star', 'p0_target',
+            'perfect_rate', 'trials_used', 'timeouts', 'time_seconds'
         ])
         writer.writeheader()
         writer.writerows(results)
