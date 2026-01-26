@@ -40,11 +40,12 @@ def d_policy_logsq(n, c):
 
 def get_d_policies():
     """return list of (policy_name, policy_func) tuples - 3 well-separated policies"""
+    from math import ceil, log, sqrt
     policies = []
-    # One low log, one high log, one logsq
-    policies.append(('d=2ln(n)', lambda n: d_policy_log(n, 2)))
-    policies.append(('d=6ln(n)', lambda n: d_policy_log(n, 6)))
-    policies.append(('d=(ln(n))²', lambda n: d_policy_logsq(n, 1.0)))
+    # Wide range: logarithmic, sublinear (sqrt), linear
+    policies.append(('d=ln(n)', lambda n: ceil(log(n))))
+    policies.append(('d=√n', lambda n: ceil(sqrt(n))))
+    policies.append(('d=n/2', lambda n: ceil(n / 2)))
     return policies
 
 def run_single_trial(m, n, d, seed):
@@ -250,7 +251,7 @@ if __name__ == "__main__":
     print('*** TEST CONFIGURATION (4 n-values × 3 α × 3 d-policies) ***')
     print(f'n_values (receivers): {config["n_values"]}')
     print(f'alpha_values (imbalance): {config["alpha_values"]}')
-    print(f'd_policies: d=2ln(n), d=6ln(n), d=(ln(n))²')
+    print(f'd_policies: d=ln(n), d=√n, d=n/2 [WIDE RANGE: log, sublinear, linear]')
     print(f'Total configurations: {len(config["n_values"]) * len(config["alpha_values"]) * 3} = 36')
     print()
     print('Design:')
